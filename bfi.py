@@ -1,6 +1,12 @@
 # Author: Willie Lawrence - cptx032 arroba gmail dot com
 import sys
 
+class NegativeNumberError(Exception):
+	pass
+
+class CellOutOfRangeError(Exception):
+	pass
+
 class BFI:
 	'''
 	'''
@@ -38,8 +44,8 @@ class BFI:
 		# if 'False' use 'stack_size' to pre set the stack size
 		self.allow_stack_expanding = kws.get('allow_stack_expanding', True)
 
-		# max element size
-		self.element_size = kws.get('', 255)
+		# max element size. None if has not limit
+		self.element_size = kws.get('element_size', None)
 
 		# switcher dictionary, a map of commands
 		# and python functions
@@ -48,8 +54,16 @@ class BFI:
 			'-' : self.dec,
 			'>' : self.move_right,
 			'<' : self.move_left,
-			'.' : self.print_elem
+			'.' : self.print_elem,
+			',' : self.read_char
 		}
+
+	@property
+	def EOF(self):
+		'''
+		returns 'True' when the interpreter comes to end of file
+		'''
+		return (self.code_cursor > (len(self.__code) - 1)) or (self.code_cursor < 0)
 
 	@property
 	def code(self):
@@ -63,12 +77,16 @@ class BFI:
 		increments the current elem of stack
 		'''
 		self.stack[self.stack_cursor] += 1
+		if (self.element_size is not None) and ( self.stack[self.stack_cursor] > self.element_size ):
+			raise CellOutOfRangeError('the cell %d has exceeded the cell range: %d' % ( self.stack_cursor, self.stack[self.stack_cursor] ))
 
 	def dec(self):
 		'''
 		decreases the current elem of stack
 		'''
 		self.stack[self.stack_cursor] -= 1
+		if (not self.allow_negative) and (self.stack[self.stack_cursor] < 0):
+			raise NegativeNumberError('Negative number in %dth posision: %d' % ( self.stack_cursor, self.stack[self.stack_cursor] ))
 
 	def move_right(self):
 		'''
@@ -84,11 +102,22 @@ class BFI:
 		'''
 		raise NotImplementedError
 
+	def unknown_command(self):
+		'''
+		called when a unknown char is called
+		'''
+		pass
+
 	def next(self):
 		'''
 		goes forward one step in the source
 		'''
-		raise NotImplementedError
+		if self.EOF:
+			return False
+		command = self.__code[self.code_cursor]
+		self.__dictionary.get(command, self.unknown_command)()
+		self.code_cursor += 1
+		return True
 
 	def back(self):
 		'''
@@ -115,5 +144,13 @@ class BFI:
 		'''
 		self.output.write( chr(self.stack[self.stack_cursor]) )
 
+	def read_char(self):
+		'''
+		reads a value from input buffer and stores it in stack
+		'''
+		self.stack[self.stack_cursor] = ord(str(self.input.read(1)))
+
 if __name__ == '__main__':
-	bfi = BFI('+++.')
+	bfi = BFI('+.++++++++++++++++++++++++++++++++++++++++++++++.+.')
+	while not bfi.EOF:
+		bfi.next()
