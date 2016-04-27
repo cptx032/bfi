@@ -90,17 +90,30 @@ class BFI:
 
 	def move_right(self):
 		'''
-		move to next element of stack
+		move to next element of stack.
+		the stack expanding has precedence to
+		stack turning. so if both are allowed
+		the stack will be expanded and not turned
 		'''
-		# fixme > verify stack elem creation
-		# and loop
-		raise NotImplementedError
+		self.stack_cursor += 1
+		if self.stack_cursor >= len(self.stack):
+			if self.allow_stack_expanding:
+				self.stack.append( 0 )
+			elif self.allow_turn_stack:
+				self.stack_cursor = 0
+			else:
+				raise CellOutOfRangeError('right move out of stack')
 
 	def move_left(self):
 		'''
 		move back in stack frame
 		'''
-		raise NotImplementedError
+		self.stack_cursor -= 1
+		if self.stack_cursor < 0:
+			if self.allow_turn_stack:
+				self.stack_cursor = len(self.stack)-1
+			else:
+				raise CellOutOfRangeError('left move out of stack')
 
 	def unknown_command(self):
 		'''
@@ -148,9 +161,10 @@ class BFI:
 		'''
 		reads a value from input buffer and stores it in stack
 		'''
-		self.stack[self.stack_cursor] = ord(str(self.input.read(1)))
+		self.stack[self.stack_cursor] = ord( str(self.input.read(1)) )
 
 if __name__ == '__main__':
-	bfi = BFI('+.++++++++++++++++++++++++++++++++++++++++++++++.+.')
+	bfi = BFI('>>>>')
 	while not bfi.EOF:
 		bfi.next()
+	print bfi.stack
