@@ -134,12 +134,6 @@ class BFI:
 		self.code_cursor += 1
 		return True
 
-	def back(self):
-		'''
-		back one step in the source
-		'''
-		raise NotImplementedError
-
 	def clear_stack(self, delete=True):
 		'''
 		clears the stack. If 'delete' param is
