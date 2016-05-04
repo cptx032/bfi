@@ -55,7 +55,9 @@ class BFI:
 			'>' : self.move_right,
 			'<' : self.move_left,
 			'.' : self.print_elem,
-			',' : self.read_char
+			',' : self.read_char,
+			'[' : self.start_while_loop,
+			']' : self.end_while_loop
 		}
 
 	@property
@@ -86,7 +88,7 @@ class BFI:
 		'''
 		self.stack[self.stack_cursor] -= 1
 		if (not self.allow_negative) and (self.stack[self.stack_cursor] < 0):
-			raise NegativeNumberError('Negative number in %dth posision: %d' % ( self.stack_cursor, self.stack[self.stack_cursor] ))
+			raise NegativeNumberError('Negative number in %dth position: %d' % ( self.stack_cursor, self.stack[self.stack_cursor] ))
 
 	def move_right(self):
 		'''
@@ -163,8 +165,48 @@ class BFI:
 		'''
 		self.stack[self.stack_cursor] = ord( str(self.input.read(1)) )
 
+	def start_while_loop(self):
+		'''
+		Goes to next command after while's end
+		if actual cell is zero
+		'''
+		# when the actual cell is zero jump to end of loop
+		if self.stack[self.stack_cursor] == 0:
+			inner_loop_counter = 0
+			# plus one because 'self.code_cursor' points to
+			# while's start it self
+			for i in range(self.code_cursor + 1, len(self.code)):
+				if self.code[i] == '[':
+					inner_loop_counter += 1
+				elif self.code[i] == ']':
+					if inner_loop_counter > 0:
+						inner_loop_counter -= 1
+					else:
+						# the next command after while's end
+						self.code_cursor = i
+						return
+
+	def end_while_loop(self):
+		'''
+		Always back to loop's start
+		'''
+		outer_loop_counter = 0
+		for i in range(self.code_cursor):
+			index = self.code_cursor - 1 - i
+			command = self.code[index]
+			if command == ']':
+				outer_loop_counter += 1
+			elif command == '[':
+				if outer_loop_counter > 0:
+					outer_loop_counter -= 1
+				else:
+					# minus one here, because the code cursor will be
+					# incremented after this function execution
+					self.code_cursor = index - 1
+					return
+
 if __name__ == '__main__':
-	bfi = BFI('>>>>')
+	bfi = BFI('+++++++++++++++.[-].')
 	while not bfi.EOF:
 		bfi.next()
-	print bfi.stack
+	print "\n", bfi.stack
