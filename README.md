@@ -37,7 +37,7 @@ import bfi
 interpreter = bfi.BFI("<", allow_turn_stack=True)
 while not interpreter.EOF:
 	interpreter.next() # run ok
-interpreter = bfi.BFI("[-]-----", allow_turn_stack=False)
+interpreter = bfi.BFI("<", allow_turn_stack=False)
 while not interpreter.EOF:
 	interpreter.next() # raises a bfi.CellOutOfRangeError
 ```
