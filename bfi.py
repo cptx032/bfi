@@ -7,6 +7,9 @@ class NegativeNumberError(Exception):
 class CellOutOfRangeError(Exception):
 	pass
 
+class StackIndexError(Exception):
+	pass
+
 class BFI:
 	'''
 	'''
@@ -104,7 +107,7 @@ class BFI:
 			elif self.allow_turn_stack:
 				self.stack_cursor = 0
 			else:
-				raise CellOutOfRangeError('right move out of stack')
+				raise StackIndexError('right move out of stack')
 
 	def move_left(self):
 		'''
@@ -115,7 +118,7 @@ class BFI:
 			if self.allow_turn_stack:
 				self.stack_cursor = len(self.stack)-1
 			else:
-				raise CellOutOfRangeError('left move out of stack')
+				raise StackIndexError('left move out of stack')
 
 	def unknown_command(self):
 		'''

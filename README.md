@@ -39,7 +39,7 @@ while not interpreter.EOF:
 	interpreter.next() # run ok
 interpreter = bfi.BFI("<", allow_turn_stack=False)
 while not interpreter.EOF:
-	interpreter.next() # raises a bfi.CellOutOfRangeError
+	interpreter.next() # raises a bfi.StackIndexError
 ```
 
 BFI has manysome other options like stack expanding, pre filling stack etc.
